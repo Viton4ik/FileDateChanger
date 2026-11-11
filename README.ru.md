@@ -11,8 +11,7 @@
 
 🇬🇧 [English version](README.md)
 
-<!-- Положите скриншот в docs/screenshot.png и раскомментируйте строку ниже -->
-<!-- ![Скриншот](docs/screenshot.png) -->
+![Скриншот](docs/screenshot.png)
 
 ---
 

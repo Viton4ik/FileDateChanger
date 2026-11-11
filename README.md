@@ -14,8 +14,12 @@ mouse.
 
 🇷🇺 [Русская версия](README.ru.md)
 
-<!-- Put a screenshot at docs/screenshot.png and uncomment the line below -->
-<!-- ![Screenshot](docs/screenshot.png) -->
+![Screenshot](docs/screenshot.png)
+
+> [!NOTE]
+> The interface is currently in Russian only. The layout is the whole program:
+> add files, pick a date, press the big button. If an English interface would
+> help you, say so in an [issue](../../issues) and it will be added.
 
 ---
 
