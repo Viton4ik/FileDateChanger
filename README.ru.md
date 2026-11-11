@@ -150,7 +150,8 @@ FileDateChanger/
 │   └── release.yml          # сборка и публикация релиза по тегу
 ├── build.bat                # сборка на Windows
 ├── build.sh                 # сборка на Linux/macOS
-└── README.md
+├── README.md                # то же по-английски
+└── README.ru.md             # этот файл
 ```
 
 ## Как это устроено
