@@ -14,15 +14,12 @@ mouse.
 
 🇷🇺 [Русская версия](README.ru.md)
 
-![Screenshot](docs/screenshot.png)
+![Screenshot](docs/screenshot-en.png)
 
 > [!NOTE]
-> The screenshot shows the Russian interface. The program follows your Windows
-> display language: English everywhere, Russian on a Russian system. To force
-> one, start it with `/en` or `/ru`, or set the `FDC_LANG` environment
-> variable.
-
----
+> The interface follows your Windows display language: English as shown
+> above, Russian on a Russian system
+> ([screenshot](docs/screenshot-ru.png)). Force one with `/en` or `/ru`.
 
 ## Interface language
 
@@ -160,6 +157,9 @@ source in this repository, rather than uploaded from somebody's machine. See
 FileDateChanger/
 ├── src/
 │   └── FileDateChanger.cs   # everything: the interface, the dates, the metadata cleaning
+├── docs/
+│   ├── screenshot-en.png
+│   └── screenshot-ru.png
 ├── .github/workflows/
 │   └── release.yml          # builds and publishes a release when a tag is pushed
 ├── build.bat                # build on Windows

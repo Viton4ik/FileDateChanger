@@ -11,7 +11,11 @@
 
 🇬🇧 [English version](README.md)
 
-![Скриншот](docs/screenshot.png)
+![Скриншот](docs/screenshot-ru.png)
+
+> [!NOTE]
+> Интерфейс следует языку Windows. На нерусской системе он
+> английский ([скриншот](docs/screenshot-en.png)).
 
 ---
 
@@ -139,10 +143,13 @@ brew install mono
 FileDateChanger/
 ├── src/
 │   └── FileDateChanger.cs   # весь код: интерфейс, смена дат, очистка метаданных
+├── docs/
+│   ├── screenshot-en.png
+│   └── screenshot-ru.png
+├── .github/workflows/
+│   └── release.yml          # сборка и публикация релиза по тегу
 ├── build.bat                # сборка на Windows
 ├── build.sh                 # сборка на Linux/macOS
-├── .gitignore
-├── .gitattributes
 └── README.md
 ```
 
