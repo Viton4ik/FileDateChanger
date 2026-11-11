@@ -17,11 +17,26 @@ mouse.
 ![Screenshot](docs/screenshot.png)
 
 > [!NOTE]
-> The interface is currently in Russian only. The layout is the whole program:
-> add files, pick a date, press the big button. If an English interface would
-> help you, say so in an [issue](../../issues) and it will be added.
+> The screenshot shows the Russian interface. The program follows your Windows
+> display language: English everywhere, Russian on a Russian system. To force
+> one, start it with `/en` or `/ru`, or set the `FDC_LANG` environment
+> variable.
 
 ---
+
+## Interface language
+
+The interface is English by default and Russian on a Russian Windows, chosen
+from `CultureInfo.CurrentUICulture`. To override it:
+
+```bat
+FileDateChanger.exe /en
+FileDateChanger.exe /ru
+set FDC_LANG=en && FileDateChanger.exe
+```
+
+The date format follows the language too: `yyyy-MM-dd` in English,
+`dd.MM.yyyy` in Russian.
 
 ## Features
 

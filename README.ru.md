@@ -15,6 +15,19 @@
 
 ---
 
+## Язык интерфейса
+
+На русской Windows интерфейс русский, на любой другой английский. Язык берётся
+из `CultureInfo.CurrentUICulture`. Принудительно:
+
+```bat
+FileDateChanger.exe /ru
+FileDateChanger.exe /en
+set FDC_LANG=ru && FileDateChanger.exe
+```
+
+Формат даты следует за языком: `dd.MM.yyyy` в русском, `yyyy-MM-dd` в английском.
+
 ## Возможности
 
 - Перетаскивание файлов и папок мышкой прямо в окно
