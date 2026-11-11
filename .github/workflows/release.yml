@@ -1,0 +1,87 @@
+name: Release
+
+# Pushing a tag that starts with "v" builds the executable on a Windows runner
+# and publishes it as a release. Running the workflow by hand builds the same
+# binary and leaves it as a downloadable artifact, without touching releases,
+# which is the safe way to check that the pipeline still works.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Compile
+        shell: cmd
+        run: |
+          set "CSC=%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
+          if not exist "%CSC%" set "CSC=%WINDIR%\Microsoft.NET\Framework\v4.0.30319\csc.exe"
+          if not exist "%CSC%" (
+            echo The .NET Framework 4 compiler was not found on this runner.
+            exit /b 1
+          )
+          if not exist bin mkdir bin
+          "%CSC%" /nologo /codepage:65001 /target:winexe /optimize+ ^
+            /out:bin\FileDateChanger.exe ^
+            /r:System.IO.Compression.dll /r:System.IO.Compression.FileSystem.dll ^
+            /r:System.Xml.Linq.dll /r:System.Windows.Forms.dll /r:System.Drawing.dll ^
+            src\FileDateChanger.cs
+
+      - name: Check the build produced something runnable
+        shell: pwsh
+        run: |
+          $exe = "bin/FileDateChanger.exe"
+          if (-not (Test-Path $exe)) { throw "No executable was produced." }
+          $size = (Get-Item $exe).Length
+          Write-Host "Built $exe, $size bytes."
+          # A WinForms build of this source lands around 24 KB. A file far
+          # smaller than that means the compile silently produced a stub.
+          if ($size -lt 10000) { throw "The executable is suspiciously small: $size bytes." }
+          # Confirm it is a real PE image rather than a text file with an .exe name.
+          $header = [System.IO.File]::ReadAllBytes($exe)[0..1]
+          if ($header[0] -ne 0x4D -or $header[1] -ne 0x5A) { throw "Not a PE executable." }
+
+      - name: Write the checksum
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash bin/FileDateChanger.exe -Algorithm SHA256).Hash.ToLower()
+          "$hash  FileDateChanger.exe" | Out-File -Encoding ascii -NoNewline bin/FileDateChanger.exe.sha256
+          Write-Host "SHA-256: $hash"
+
+      - name: Upload as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FileDateChanger
+          path: |
+            bin/FileDateChanger.exe
+            bin/FileDateChanger.exe.sha256
+          if-no-files-found: error
+
+      - name: Publish the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; replacing its files."
+            gh release upload "$TAG" \
+              bin/FileDateChanger.exe bin/FileDateChanger.exe.sha256 --clobber
+          else
+            gh release create "$TAG" \
+              bin/FileDateChanger.exe bin/FileDateChanger.exe.sha256 \
+              --title "FileDateChanger ${TAG#v}" \
+              --generate-notes
+          fi
