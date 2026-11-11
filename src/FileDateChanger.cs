@@ -15,27 +15,17 @@ using System.Xml.Linq;
 
 namespace FileDateChanger
 {
-    static class Program
+    // ---------- Language / Язык ----------
+    //
+    // The interface follows the Windows display language: Russian on a
+    // Russian system, English everywhere else. Override it with the FDC_LANG
+    // environment variable or a /ru or /en switch on the command line.
+    //
+    // This lives in its own class because the interface strings are spread
+    // across more than one class, and a helper private to the form would not
+    // be in scope for the rest.
+    static class L
     {
-        [STAThread]
-        static void Main()
-        {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
-        }
-    }
-
-    class MainForm : Form
-    {
-        // ---------- Language / Язык ----------
-        //
-        // The interface follows the Windows display language: Russian on a
-        // Russian system, English everywhere else. Override it with the
-        // FDC_LANG environment variable or a /ru or /en switch on the command
-        // line. Declared before any field whose initialiser calls T(), because
-        // static initialisers run in declaration order.
-
         static readonly bool RU = DetectRussian();
 
         static bool DetectRussian()
@@ -54,10 +44,24 @@ namespace FileDateChanger
             return CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ru";
         }
 
-        static string T(string ru, string en) { return RU ? ru : en; }
+        public static string T(string ru, string en) { return RU ? ru : en; }
+    }
 
-        static readonly string DateFmt = T("dd.MM.yyyy HH:mm:ss", "yyyy-MM-dd HH:mm:ss");
-        static readonly string DatePickFmt = T("dd.MM.yyyy", "yyyy-MM-dd");
+    static class Program
+    {
+        [STAThread]
+        static void Main()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new MainForm());
+        }
+    }
+
+    class MainForm : Form
+    {
+        static readonly string DateFmt = L.T("dd.MM.yyyy HH:mm:ss", "yyyy-MM-dd HH:mm:ss");
+        static readonly string DatePickFmt = L.T("dd.MM.yyyy", "yyyy-MM-dd");
 
         ListView list;
         DateTimePicker datePick, timePick;
@@ -72,7 +76,7 @@ namespace FileDateChanger
             SuspendLayout();
             AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
-            Text = T("Смена даты файлов", "File Date Changer");
+            Text = L.T("Смена даты файлов", "File Date Changer");
             Font = new Font("Segoe UI", 9.5f);
             ClientSize = new Size(820, 540);
             MinimumSize = new Size(760, 480);
@@ -81,17 +85,17 @@ namespace FileDateChanger
             DragEnter += OnDragEnter;
             DragDrop += OnDragDrop;
 
-            Button btnAdd = MakeButton(T("Добавить файлы", "Add files"), 10, 10, 150);
+            Button btnAdd = MakeButton(L.T("Добавить файлы", "Add files"), 10, 10, 150);
             btnAdd.Click += delegate { AddFilesDialog(); };
-            Button btnFolder = MakeButton(T("Добавить папку", "Add folder"), 165, 10, 150);
+            Button btnFolder = MakeButton(L.T("Добавить папку", "Add folder"), 165, 10, 150);
             btnFolder.Click += delegate { AddFolderDialog(); };
-            Button btnRemove = MakeButton(T("Убрать выбранные", "Remove selected"), 320, 10, 160);
+            Button btnRemove = MakeButton(L.T("Убрать выбранные", "Remove selected"), 320, 10, 160);
             btnRemove.Click += delegate { RemoveSelected(); };
-            Button btnClear = MakeButton(T("Очистить список", "Clear list"), 485, 10, 150);
+            Button btnClear = MakeButton(L.T("Очистить список", "Clear list"), 485, 10, 150);
             btnClear.Click += delegate { list.Items.Clear(); paths.Clear(); };
 
             Label hint = new Label();
-            hint.Text = T("Можно просто перетащить файлы и папки мышкой в список ниже.", "You can simply drag files and folders into the list below.");
+            hint.Text = L.T("Можно просто перетащить файлы и папки мышкой в список ниже.", "You can simply drag files and folders into the list below.");
             hint.ForeColor = SystemColors.GrayText;
             hint.AutoSize = true;
             hint.Location = new Point(10, 50);
@@ -106,10 +110,10 @@ namespace FileDateChanger
             list.Location = new Point(10, 74);
             list.Size = new Size(800, 286);
             list.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            list.Columns.Add(T("Файл", "File"), 330);
-            list.Columns.Add(T("Создан", "Created"), 140);
-            list.Columns.Add(T("Изменён", "Modified"), 140);
-            list.Columns.Add(T("Результат", "Result"), 170);
+            list.Columns.Add(L.T("Файл", "File"), 330);
+            list.Columns.Add(L.T("Создан", "Created"), 140);
+            list.Columns.Add(L.T("Изменён", "Modified"), 140);
+            list.Columns.Add(L.T("Результат", "Result"), 170);
             list.DragEnter += OnDragEnter;
             list.DragDrop += OnDragDrop;
             list.KeyDown += delegate(object s, KeyEventArgs e) { if (e.KeyCode == Keys.Delete) RemoveSelected(); };
@@ -117,7 +121,7 @@ namespace FileDateChanger
             Controls.Add(list);
 
             // --- Новая дата ---
-            GroupBox grpDate = MakeGroup(T("Новая дата и время", "New date and time"), 10, 368, 300, 108);
+            GroupBox grpDate = MakeGroup(L.T("Новая дата и время", "New date and time"), 10, 368, 300, 108);
             grpDate.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             datePick = new DateTimePicker();
             datePick.Format = DateTimePickerFormat.Custom;
@@ -131,7 +135,7 @@ namespace FileDateChanger
             timePick.Location = new Point(155, 28);
             timePick.Width = 125;
             Button btnFromFile = new Button();
-            btnFromFile.Text = T("Взять дату с выбранного файла", "Take the date from the selected file");
+            btnFromFile.Text = L.T("Взять дату с выбранного файла", "Take the date from the selected file");
             btnFromFile.Location = new Point(15, 66);
             btnFromFile.Size = new Size(265, 30);
             btnFromFile.Click += delegate { TakeDateFromSelected(); };
@@ -140,31 +144,31 @@ namespace FileDateChanger
             grpDate.Controls.Add(btnFromFile);
 
             // --- Что менять ---
-            GroupBox grpWhat = MakeGroup(T("Какие даты менять", "Which dates to change"), 320, 368, 200, 108);
+            GroupBox grpWhat = MakeGroup(L.T("Какие даты менять", "Which dates to change"), 320, 368, 200, 108);
             grpWhat.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            chkCreated = MakeCheck(T("Дата создания", "Creation date"), 15, 25, true);
-            chkModified = MakeCheck(T("Дата изменения", "Modification date"), 15, 50, true);
-            chkAccessed = MakeCheck(T("Дата открытия", "Access date"), 15, 75, true);
+            chkCreated = MakeCheck(L.T("Дата создания", "Creation date"), 15, 25, true);
+            chkModified = MakeCheck(L.T("Дата изменения", "Modification date"), 15, 50, true);
+            chkAccessed = MakeCheck(L.T("Дата открытия", "Access date"), 15, 75, true);
             grpWhat.Controls.Add(chkCreated);
             grpWhat.Controls.Add(chkModified);
             grpWhat.Controls.Add(chkAccessed);
 
             // --- Дополнительно ---
-            GroupBox grpExtra = MakeGroup(T("Дополнительно", "Extras"), 530, 368, 280, 108);
+            GroupBox grpExtra = MakeGroup(L.T("Дополнительно", "Extras"), 530, 368, 280, 108);
             grpExtra.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            chkMeta = MakeCheck(T("Очистить метаданные внутри файла", "Clean metadata inside the file"), 15, 25, false);
+            chkMeta = MakeCheck(L.T("Очистить метаданные внутри файла", "Clean metadata inside the file"), 15, 25, false);
             Label metaNote = new Label();
             metaNote.Text = "Word, Excel, PowerPoint, JPG, PNG";
             metaNote.ForeColor = SystemColors.GrayText;
             metaNote.AutoSize = true;
             metaNote.Location = new Point(33, 47);
-            chkZone = MakeCheck(T("Убрать пометку «скачано из интернета»", "Remove the \"from the internet\" mark"), 15, 75, false);
+            chkZone = MakeCheck(L.T("Убрать пометку «скачано из интернета»", "Remove the \"from the internet\" mark"), 15, 75, false);
             grpExtra.Controls.Add(chkMeta);
             grpExtra.Controls.Add(metaNote);
             grpExtra.Controls.Add(chkZone);
 
             Button btnApply = new Button();
-            btnApply.Text = T("Применить", "Apply");
+            btnApply.Text = L.T("Применить", "Apply");
             btnApply.Font = new Font("Segoe UI", 11f, FontStyle.Bold);
             btnApply.Location = new Point(10, 486);
             btnApply.Size = new Size(800, 44);
@@ -234,8 +238,8 @@ namespace FileDateChanger
         bool AskRecurse()
         {
             return MessageBox.Show(this,
-                T("Добавить также все файлы внутри папки (включая подпапки)?\n\n«Нет» - менять дату только у самой папки.", "Add every file inside the folder as well, including subfolders?\n\nChoosing No changes the date of the folder itself only."),
-                T("Папка", "Folder"), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
+                L.T("Добавить также все файлы внутри папки (включая подпапки)?\n\n«Нет» - менять дату только у самой папки.", "Add every file inside the folder as well, including subfolders?\n\nChoosing No changes the date of the folder itself only."),
+                L.T("Папка", "Folder"), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
         }
 
         void AddFilesDialog()
@@ -243,7 +247,7 @@ namespace FileDateChanger
             using (OpenFileDialog dlg = new OpenFileDialog())
             {
                 dlg.Multiselect = true;
-                dlg.Title = T("Выберите файлы", "Select files");
+                dlg.Title = L.T("Выберите файлы", "Select files");
                 if (dlg.ShowDialog(this) == DialogResult.OK)
                     foreach (string f in dlg.FileNames) AddPath(f, false);
             }
@@ -253,7 +257,7 @@ namespace FileDateChanger
         {
             using (FolderBrowserDialog dlg = new FolderBrowserDialog())
             {
-                dlg.Description = T("Выберите папку", "Select a folder");
+                dlg.Description = L.T("Выберите папку", "Select a folder");
                 if (dlg.ShowDialog(this) == DialogResult.OK)
                     AddPath(dlg.SelectedPath, AskRecurse());
             }
@@ -274,7 +278,7 @@ namespace FileDateChanger
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(this, T("Не удалось прочитать часть папки:\n", "Part of the folder could not be read:\n") + ex.Message, T("Внимание", "Warning"),
+                        MessageBox.Show(this, L.T("Не удалось прочитать часть папки:\n", "Part of the folder could not be read:\n") + ex.Message, L.T("Внимание", "Warning"),
                             MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
@@ -323,7 +327,7 @@ namespace FileDateChanger
         {
             if (list.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, T("Сначала выделите файл в списке.", "Select a file in the list first."), T("Подсказка", "Hint"));
+                MessageBox.Show(this, L.T("Сначала выделите файл в списке.", "Select a file in the list first."), L.T("Подсказка", "Hint"));
                 return;
             }
             string p = (string)list.SelectedItems[0].Tag;
@@ -338,21 +342,21 @@ namespace FileDateChanger
         {
             if (list.Items.Count == 0)
             {
-                MessageBox.Show(this, T("Список пуст. Добавьте файлы кнопкой или перетащите их.", "The list is empty. Add files with the button, or drag them in."), T("Нет файлов", "No files"));
+                MessageBox.Show(this, L.T("Список пуст. Добавьте файлы кнопкой или перетащите их.", "The list is empty. Add files with the button, or drag them in."), L.T("Нет файлов", "No files"));
                 return;
             }
             if (!chkCreated.Checked && !chkModified.Checked && !chkAccessed.Checked && !chkMeta.Checked && !chkZone.Checked)
             {
-                MessageBox.Show(this, T("Не выбрано ни одного действия.", "No action has been selected."), T("Нечего делать", "Nothing to do"));
+                MessageBox.Show(this, L.T("Не выбрано ни одного действия.", "No action has been selected."), L.T("Нечего делать", "Nothing to do"));
                 return;
             }
 
             DateTime t = timePick.Value;
             DateTime dt = datePick.Value.Date.Add(new TimeSpan(t.Hour, t.Minute, t.Second));
 
-            string question = string.Format(T("Обработать {0} элемент(ов)?\nНовая дата: {1}", "Process {0} item(s)?\nNew date: {1}"), list.Items.Count, dt.ToString(DateFmt));
-            if (chkMeta.Checked) question += T("\n\nМетаданные будут удалены внутри файлов. Это необратимо, лучше иметь копию.", "\n\nMetadata inside the files will be removed. That cannot be undone, so keep a copy.");
-            if (MessageBox.Show(this, question, T("Подтверждение", "Confirmation"), MessageBoxButtons.OKCancel, MessageBoxIcon.Question) != DialogResult.OK)
+            string question = string.Format(L.T("Обработать {0} элемент(ов)?\nНовая дата: {1}", "Process {0} item(s)?\nNew date: {1}"), list.Items.Count, dt.ToString(DateFmt));
+            if (chkMeta.Checked) question += L.T("\n\nМетаданные будут удалены внутри файлов. Это необратимо, лучше иметь копию.", "\n\nMetadata inside the files will be removed. That cannot be undone, so keep a copy.");
+            if (MessageBox.Show(this, question, L.T("Подтверждение", "Confirmation"), MessageBoxButtons.OKCancel, MessageBoxIcon.Question) != DialogResult.OK)
                 return;
 
             Cursor = Cursors.WaitCursor;
@@ -368,13 +372,13 @@ namespace FileDateChanger
                 try
                 {
                     string note = Process((string)it.Tag, dt);
-                    it.SubItems[3].Text = T("Готово", "Done") + note;
+                    it.SubItems[3].Text = L.T("Готово", "Done") + note;
                     it.ForeColor = SystemColors.WindowText;
                     ok++;
                 }
                 catch (Exception ex)
                 {
-                    it.SubItems[3].Text = T("Ошибка: ", "Error: ") + ex.Message;
+                    it.SubItems[3].Text = L.T("Ошибка: ", "Error: ") + ex.Message;
                     it.ForeColor = Color.Firebrick;
                     fail++;
                 }
@@ -383,9 +387,9 @@ namespace FileDateChanger
             }
             Cursor = Cursors.Default;
 
-            string res = T("Успешно: ", "Succeeded: ") + ok;
-            if (fail > 0) res += T("\nС ошибками: ", "\nFailed: ") + fail + T(" (причина в колонке «Результат»; часто файл открыт в другой программе)", " (the reason is in the Result column; often the file is open in another program)");
-            MessageBox.Show(this, res, T("Готово", "Done"), MessageBoxButtons.OK, fail > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
+            string res = L.T("Успешно: ", "Succeeded: ") + ok;
+            if (fail > 0) res += L.T("\nС ошибками: ", "\nFailed: ") + fail + L.T(" (причина в колонке «Результат»; часто файл открыт в другой программе)", " (the reason is in the Result column; often the file is open in another program)");
+            MessageBox.Show(this, res, L.T("Готово", "Done"), MessageBoxButtons.OK, fail > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
         }
 
         string Process(string path, DateTime dt)
@@ -411,7 +415,7 @@ namespace FileDateChanger
                 if (chkMeta.Checked) note = Metadata.Clean(path, dt);
                 if (chkZone.Checked)
                 {
-                    if (DeleteFile(path + ":Zone.Identifier")) note += T(", пометка снята", ", mark removed");
+                    if (DeleteFile(path + ":Zone.Identifier")) note += L.T(", пометка снята", ", mark removed");
                 }
                 // Даты ставим последними: очистка метаданных меняет файл.
                 // Не отмеченные даты возвращаем как были.
@@ -438,17 +442,17 @@ namespace FileDateChanger
             string ext = Path.GetExtension(path).ToLowerInvariant();
             try
             {
-                if (OfficeExt.Contains(ext)) { CleanOffice(path, dt); return T(", метаданные очищены", ", metadata cleaned"); }
+                if (OfficeExt.Contains(ext)) { CleanOffice(path, dt); return L.T(", метаданные очищены", ", metadata cleaned"); }
                 if (ext == ".jpg" || ext == ".jpeg" || ext == ".jfif")
-                    return RewriteIfChanged(path, StripJpeg) ? T(", метаданные удалены", ", metadata removed") : T(", метаданных не было", ", there was no metadata");
+                    return RewriteIfChanged(path, StripJpeg) ? L.T(", метаданные удалены", ", metadata removed") : L.T(", метаданных не было", ", there was no metadata");
                 if (ext == ".png")
-                    return RewriteIfChanged(path, StripPng) ? T(", метаданные удалены", ", metadata removed") : T(", метаданных не было", ", there was no metadata");
-                if (Unsupported.Contains(ext)) return T(", метаданные: формат не поддерживается", ", metadata: format not supported");
+                    return RewriteIfChanged(path, StripPng) ? L.T(", метаданные удалены", ", metadata removed") : L.T(", метаданных не было", ", there was no metadata");
+                if (Unsupported.Contains(ext)) return L.T(", метаданные: формат не поддерживается", ", metadata: format not supported");
                 return "";
             }
             catch (Exception ex)
             {
-                return T(", метаданные НЕ очищены (", ", metadata NOT cleaned (") + ex.Message + ")";
+                return L.T(", метаданные НЕ очищены (", ", metadata NOT cleaned (") + ex.Message + ")";
             }
         }
 
@@ -529,14 +533,14 @@ namespace FileDateChanger
         // Удаляет EXIF/XMP (APP1), Photoshop/IPTC (APP13), Ducky (APP12), комментарии. Без пересжатия.
         static byte[] StripJpeg(byte[] d)
         {
-            if (d.Length < 4 || d[0] != 0xFF || d[1] != 0xD8) throw new InvalidDataException(T("файл не похож на JPEG", "the file does not look like a JPEG"));
+            if (d.Length < 4 || d[0] != 0xFF || d[1] != 0xD8) throw new InvalidDataException(L.T("файл не похож на JPEG", "the file does not look like a JPEG"));
             MemoryStream o = new MemoryStream(d.Length);
             o.WriteByte(0xFF);
             o.WriteByte(0xD8);
             int p = 2;
             while (p + 1 < d.Length)
             {
-                if (d[p] != 0xFF) throw new InvalidDataException(T("повреждённый JPEG", "damaged JPEG"));
+                if (d[p] != 0xFF) throw new InvalidDataException(L.T("повреждённый JPEG", "damaged JPEG"));
                 byte m = d[p + 1];
                 if (m == 0xFF) { p++; continue; }
                 if (m == 0xDA || m == 0xD9)
@@ -547,21 +551,21 @@ namespace FileDateChanger
                 if (p + 3 >= d.Length) break;
                 int len = (d[p + 2] << 8) | d[p + 3];
                 int end = p + 2 + len;
-                if (len < 2 || end > d.Length) throw new InvalidDataException(T("повреждённый JPEG", "damaged JPEG"));
+                if (len < 2 || end > d.Length) throw new InvalidDataException(L.T("повреждённый JPEG", "damaged JPEG"));
                 bool drop = m == 0xE1 || m == 0xED || m == 0xEC || m == 0xFE;
                 if (!drop) o.Write(d, p, end - p);
                 p = end;
             }
-            throw new InvalidDataException(T("повреждённый JPEG", "damaged JPEG"));
+            throw new InvalidDataException(L.T("повреждённый JPEG", "damaged JPEG"));
         }
 
         // Удаляет текстовые блоки, EXIF и время из PNG. Картинка не меняется.
         static byte[] StripPng(byte[] d)
         {
             byte[] sig = { 137, 80, 78, 71, 13, 10, 26, 10 };
-            if (d.Length < 8) throw new InvalidDataException(T("файл не похож на PNG", "the file does not look like a PNG"));
+            if (d.Length < 8) throw new InvalidDataException(L.T("файл не похож на PNG", "the file does not look like a PNG"));
             for (int i = 0; i < 8; i++)
-                if (d[i] != sig[i]) throw new InvalidDataException(T("файл не похож на PNG", "the file does not look like a PNG"));
+                if (d[i] != sig[i]) throw new InvalidDataException(L.T("файл не похож на PNG", "the file does not look like a PNG"));
             MemoryStream o = new MemoryStream(d.Length);
             o.Write(d, 0, 8);
             int p = 8;
@@ -570,7 +574,7 @@ namespace FileDateChanger
                 long len = ((long)d[p] << 24) | ((long)d[p + 1] << 16) | ((long)d[p + 2] << 8) | d[p + 3];
                 string type = Encoding.ASCII.GetString(d, p + 4, 4);
                 long total = 12 + len;
-                if (p + total > d.Length) throw new InvalidDataException(T("повреждённый PNG", "damaged PNG"));
+                if (p + total > d.Length) throw new InvalidDataException(L.T("повреждённый PNG", "damaged PNG"));
                 bool drop = type == "tEXt" || type == "zTXt" || type == "iTXt" || type == "eXIf" || type == "tIME";
                 if (!drop) o.Write(d, p, (int)total);
                 p += (int)total;
